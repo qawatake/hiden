@@ -1,0 +1,149 @@
+# hiden CLI 仕様書
+
+## 概要
+
+`hiden` は、ghqで管理しているリポジトリ内の個人用メモ・スクリプト置き場（hidenディレクトリ）を横断的に検索・アクセスするためのCLIツール。
+
+## 用語定義
+
+- **hidenディレクトリ**: 各リポジトリ内に存在する、個人用のメモやスクリプトを保存するディレクトリ。各自が `.gitignore` で除外して使用する。
+
+## 技術スタック
+
+- 言語: Go
+- fuzzy finder: [go-fuzzyfinder](https://github.com/ktr0731/go-fuzzyfinder) ライブラリを使用（外部コマンド依存なし）
+
+## 設定ファイル
+
+### パス
+
+```
+~/.config/hiden/config.json
+```
+
+### スキーマ
+
+```json
+{
+  "dirname": ".hiden"
+}
+```
+
+### フィールド
+
+| フィールド | 型 | デフォルト値 | 説明 |
+|-----------|------|-------------|------|
+| `dirname` | string | `".hiden"` | hidenディレクトリの名前 |
+
+### 挙動
+
+- 設定ファイルが存在しない場合: デフォルト値を使用
+- 設定ファイルが不正な場合: エラーを出力して終了
+
+## コマンド
+
+### `hiden ls`
+
+hidenディレクトリ内のファイルをfuzzy finderで検索し、選択したファイルの絶対パスを出力する。
+
+#### 処理フロー
+
+1. `ghq list --full-path` コマンドを実行し、全リポジトリの絶対パス一覧を取得
+2. 各リポジトリ内のhidenディレクトリを検索
+3. hidenディレクトリ内のファイルを再帰的に収集
+4. タイムスタンプ（更新日時）の新しい順にソート
+5. fuzzy finderを起動し、ユーザーに選択させる
+6. 選択されたファイルのタイムスタンプを現在時刻に更新（`touch`相当）
+7. 選択されたファイルの絶対パスを標準出力に出力
+
+#### 表示形式
+
+fuzzy finderの各行には以下の情報を表示:
+
+```
+YYYY-MM-DD  relative/path/to/file  [repository-name]
+```
+
+例:
+```
+2025-12-04  memo.md           [my-project]
+2025-12-03  scripts/build.sh  [another-repo]
+2025-11-28  notes/idea.txt    [some-tool]
+```
+
+#### 終了コード
+
+| コード | 条件 |
+|-------|------|
+| 0 | 正常終了（ファイル選択成功） |
+| 1 | エラー終了（Ctrl+C による中断、その他のエラー） |
+
+#### エラーケース
+
+- `ghq` コマンドが見つからない、または `ghq list` が失敗した場合: エラーメッセージを出力して終了
+- hidenディレクトリが1つも見つからない場合: エラーメッセージを出力して終了
+- ファイルが1つも見つからない場合: エラーメッセージを出力して終了
+- Ctrl+C で中断された場合: 何も出力せずエラー終了
+
+#### 対象ファイル
+
+- hidenディレクトリ内のすべてのファイル（再帰的）
+- 隠しファイル（`.`で始まるファイル）も対象
+- ディレクトリは対象外（ファイルのみ）
+
+### `hiden version`
+
+バージョン情報を出力する。
+
+```
+hiden version X.Y.Z
+```
+
+### `hiden help`
+
+ヘルプメッセージを出力する。
+
+## 使用例
+
+### 基本的な使い方
+
+```bash
+# ファイルを検索して選択
+$ hiden ls
+# → fuzzy finderが起動
+# → ファイルを選択すると絶対パスが出力される
+/Users/user/src/github.com/org/repo/.hiden/memo.md
+
+# エディタで開く
+$ vim $(hiden ls)
+
+# 設定を確認
+$ cat ~/.config/hiden/config.json
+{"dirname": ".hiden"}
+```
+
+## ディレクトリ構造例
+
+```
+~/src/github.com/
+├── org1/
+│   └── repo1/
+│       ├── src/
+│       ├── .gitignore      # .hiden/ を除外
+│       └── .hiden/         # ← hidenディレクトリ
+│           ├── memo.md
+│           └── scripts/
+│               └── test.sh
+└── org2/
+    └── repo2/
+        ├── lib/
+        ├── .gitignore      # .hiden/ を除外
+        └── .hiden/         # ← hidenディレクトリ
+            └── notes.txt
+```
+
+## 将来の拡張案（未実装）
+
+- `hiden init`: 現在のリポジトリにhidenディレクトリを作成し、.gitignoreに追加
+- `hiden new <filename>`: 新規ファイルを作成
+- `hiden edit`: 選択したファイルを$EDITORで開く
