@@ -47,7 +47,7 @@
 
 ### `hiden ls`
 
-hidenディレクトリ内のファイルをfuzzy finderで検索し、選択したファイルの絶対パスを出力する。
+hidenディレクトリ内のファイルをインクリメンタル検索し、選択したファイルの絶対パスを出力する。
 
 #### 処理フロー
 
@@ -55,13 +55,13 @@ hidenディレクトリ内のファイルをfuzzy finderで検索し、選択し
 2. 各リポジトリ内のhidenディレクトリを検索
 3. hidenディレクトリ内のファイルを再帰的に収集
 4. タイムスタンプ（更新日時）の新しい順にソート
-5. fuzzy finderを起動し、ユーザーに選択させる
+5. インクリメンタル検索UIを起動し、ユーザーに選択させる
 6. 選択されたファイルのタイムスタンプを現在時刻に更新（`touch`相当）
 7. 選択されたファイルの絶対パスを標準出力に出力
 
 #### 表示形式
 
-fuzzy finderの各行には以下の情報を表示:
+検索UIの各行には以下の情報を表示:
 
 ```
 YYYY-MM-DD  relative/path/to/file  [repository-name]
@@ -158,7 +158,7 @@ hiden version X.Y.Z
 ```bash
 # ファイルを検索して選択
 $ hiden ls
-# → fuzzy finderが起動
+# → インクリメンタル検索UIが起動
 # → ファイルを選択すると絶対パスが出力される
 /Users/user/src/github.com/org/repo/.hiden/memo.md
 
