@@ -11,7 +11,7 @@ func TestFilterItems_EmptyQuery(t *testing.T) {
 		{displayLabel: "2025-12-03  notes.txt  [repo2]", absPath: "/path/notes.txt"},
 	}
 
-	m := newSelector(items)
+	m := newSelector(items, nil)
 	m.input.SetValue("")
 	m.filterItems()
 
@@ -27,7 +27,7 @@ func TestFilterItems_SingleKeyword(t *testing.T) {
 		{displayLabel: "2025-12-02  script.sh  [repo3]", absPath: "/path/script.sh"},
 	}
 
-	m := newSelector(items)
+	m := newSelector(items, nil)
 	m.input.SetValue("memo")
 	m.filterItems()
 
@@ -48,7 +48,7 @@ func TestFilterItems_ANDSearch(t *testing.T) {
 		{displayLabel: "2025-12-01  todo.md  [my-project]", absPath: "/path/todo.md"},
 	}
 
-	m := newSelector(items)
+	m := newSelector(items, nil)
 	m.input.SetValue("md my")
 	m.filterItems()
 
@@ -69,7 +69,7 @@ func TestFilterItems_CaseInsensitive(t *testing.T) {
 		{displayLabel: "2025-12-03  notes.txt  [repo2]", absPath: "/path/notes.txt"},
 	}
 
-	m := newSelector(items)
+	m := newSelector(items, nil)
 	m.input.SetValue("readme")
 	m.filterItems()
 
@@ -88,7 +88,7 @@ func TestFilterItems_NoMatch(t *testing.T) {
 		{displayLabel: "2025-12-03  notes.txt  [repo2]", absPath: "/path/notes.txt"},
 	}
 
-	m := newSelector(items)
+	m := newSelector(items, nil)
 	m.input.SetValue("nonexistent")
 	m.filterItems()
 
@@ -106,7 +106,7 @@ func TestFilterItems_PreservesOrder(t *testing.T) {
 		{displayLabel: "2025-12-02  file1.txt  [repo]", absPath: "/path/file1.txt", modTime: now.Add(-48 * time.Hour)},
 	}
 
-	m := newSelector(items)
+	m := newSelector(items, nil)
 	m.input.SetValue("file")
 	m.filterItems()
 
