@@ -31,13 +31,10 @@ func Run(dirname string) (string, error) {
 		return "", fmt.Errorf("failed to create directory: %w", err)
 	}
 
-	// Get absolute path
-	absPath, err := filepath.Abs(dirPath)
-	if err != nil {
-		return "", fmt.Errorf("failed to get absolute path: %w", err)
-	}
+	// Return relative path from repository root
+	relPath := filepath.Join(dirname, today)
 
-	return absPath, nil
+	return relPath, nil
 }
 
 // getGitRepoRoot returns the root directory of the git repository
