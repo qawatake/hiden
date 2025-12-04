@@ -1,39 +1,39 @@
 # hiden
 
-ghqで管理しているリポジトリ内の個人用メモ・スクリプト置き場（hidenディレクトリ）を横断的に検索・アクセスするためのCLIツール。
+A CLI tool to search and access personal memo/script directories (hiden directories) across repositories managed by ghq.
 
-## インストール
+## Installation
 
 ```bash
 go install github.com/qawatake/hiden@latest
 ```
 
-## 使い方
+## Usage
 
-### ファイル検索
+### Search files
 
 ```bash
-# インクリメンタル検索でファイルを選択
+# Select a file with incremental search
 hiden ls
 
-# エディタで開く
+# Open in editor
 vim $(hiden ls)
 ```
 
-### 日付ディレクトリ作成
+### Create date directory
 
 ```bash
-# 現在のリポジトリに今日の日付のディレクトリを作成
+# Create today's date directory in current repository
 hiden mkdir
 # => .hiden/2025-12-04
 
-# 作成したディレクトリに移動
+# Change to the created directory
 cd $(hiden mkdir)
 ```
 
-## 設定
+## Configuration
 
-設定ファイル: `~/.config/hiden/config.json`
+Config file: `~/.config/hiden/config.json`
 
 ```json
 {
@@ -41,25 +41,25 @@ cd $(hiden mkdir)
 }
 ```
 
-| フィールド | デフォルト | 説明 |
-|-----------|-----------|------|
-| `dirname` | `.hiden` | hidenディレクトリの名前 |
+| Field | Default | Description |
+|-------|---------|-------------|
+| `dirname` | `.hiden` | Name of the hiden directory |
 
-## ディレクトリ構成例
+## Directory structure example
 
 ```
 ~/src/github.com/
 ├── org1/repo1/
-│   ├── .gitignore   # .hiden/ を除外
+│   ├── .gitignore   # exclude .hiden/
 │   └── .hiden/
 │       ├── memo.md
 │       └── scripts/test.sh
 └── org2/repo2/
-    ├── .gitignore   # .hiden/ を除外
+    ├── .gitignore   # exclude .hiden/
     └── .hiden/
         └── notes.txt
 ```
 
-## ライセンス
+## License
 
 MIT
