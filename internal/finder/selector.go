@@ -2,6 +2,7 @@ package finder
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -18,9 +19,10 @@ type selectorModel struct {
 	height        int
 	selected      *entry
 	cancelled     bool
+	renderer      *lipgloss.Renderer
 }
 
-func newSelector(items []entry) selectorModel {
+func newSelector(items []entry, renderer *lipgloss.Renderer) selectorModel {
 	ti := textinput.New()
 	ti.Placeholder = "Search..."
 	ti.Prompt = "> "
@@ -33,6 +35,7 @@ func newSelector(items []entry) selectorModel {
 		filteredItems: items,
 		input:         ti,
 		cursor:        0,
+		renderer:      renderer,
 	}
 }
 
@@ -122,7 +125,7 @@ func (m selectorModel) View() string {
 	b.WriteString(m.input.View() + "\n")
 
 	// Show count
-	countStyle := lipgloss.NewStyle().
+	countStyle := m.renderer.NewStyle().
 		Foreground(lipgloss.Color("241"))
 	b.WriteString("  " + countStyle.Render(fmt.Sprintf("%d/%d", len(m.filteredItems), len(m.allItems))) + "\n")
 
@@ -145,11 +148,11 @@ func (m selectorModel) View() string {
 		}
 	}
 
-	selectedStyle := lipgloss.NewStyle().
+	selectedStyle := m.renderer.NewStyle().
 		Background(lipgloss.Color("62")).
 		Foreground(lipgloss.Color("230"))
 
-	normalStyle := lipgloss.NewStyle()
+	normalStyle := m.renderer.NewStyle()
 
 	for i := start; i < end; i++ {
 		cursor := "  "
@@ -167,7 +170,7 @@ func (m selectorModel) View() string {
 	}
 
 	if len(m.filteredItems) == 0 {
-		noResultStyle := lipgloss.NewStyle().
+		noResultStyle := m.renderer.NewStyle().
 			Foreground(lipgloss.Color("241")).
 			Italic(true)
 		b.WriteString("  " + noResultStyle.Render("No matches found\n"))
@@ -177,7 +180,26 @@ func (m selectorModel) View() string {
 }
 
 func runSelector(items []entry) (*entry, error) {
-	p := tea.NewProgram(newSelector(items), tea.WithAltScreen())
+	// Open /dev/tty directly to enable interactive UI even in subshells
+	tty, err := os.OpenFile("/dev/tty", os.O_RDWR, 0)
+	if err != nil {
+		// Fallback: if /dev/tty is not available, return the first item
+		if len(items) > 0 {
+			return &items[0], nil
+		}
+		return nil, fmt.Errorf("failed to open /dev/tty and no items available: %w", err)
+	}
+	defer tty.Close()
+
+	// Create a lipgloss renderer for the tty
+	renderer := lipgloss.NewRenderer(tty)
+
+	p := tea.NewProgram(
+		newSelector(items, renderer),
+		tea.WithInput(tty),
+		tea.WithOutput(tty),
+		tea.WithAltScreen(),
+	)
 
 	model, err := p.Run()
 	if err != nil {
