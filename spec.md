@@ -11,8 +11,7 @@
 ## 技術スタック
 
 - 言語: Go
-- インタラクティブ検索: [go-fzf](https://github.com/koki-develop/go-fzf) ライブラリを使用（外部コマンド依存なし）
-  - 注: go-fuzzyfinder は入力欄が画面下部にあるため不採用
+- インタラクティブ検索: [bubbletea](https://github.com/charmbracelet/bubbletea) + [lipgloss](https://github.com/charmbracelet/lipgloss) で独自実装（外部コマンド依存なし）
   - 検索方式: 入力文字列を必ず含む部分一致検索（大文字小文字を区別しない）
   - スペース区切りでAND検索
   - ソート順: 最終更新時刻の降順（固定）
@@ -106,7 +105,7 @@ git repository内に日付ディレクトリを作成する。
 2. git repositoryでない場合はエラーを出力して終了
 3. git repositoryのルートディレクトリを取得
 4. `{リポジトリルート}/{hidenディレクトリ}/{コマンド実行日}` のディレクトリを作成
-5. 作成されたディレクトリの絶対パスを標準出力に出力
+5. 作成されたディレクトリのリポジトリルートからの相対パスを標準出力に出力
 
 #### ディレクトリ形式
 
@@ -116,12 +115,12 @@ git repository内に日付ディレクトリを作成する。
 
 例（hidenディレクトリが`.hiden`の場合）:
 ```
-/path/to/repo/.hiden/2025-12-04
+.hiden/2025-12-04
 ```
 
 例（hidenディレクトリが`qwtk`の場合）:
 ```
-/path/to/repo/qwtk/2025-12-04
+qwtk/2025-12-04
 ```
 
 #### 終了コード
@@ -190,9 +189,3 @@ $ cat ~/.config/hiden/config.json
         └── .hiden/         # ← hidenディレクトリ
             └── notes.txt
 ```
-
-## 将来の拡張案（未実装）
-
-- `hiden init`: 現在のリポジトリにhidenディレクトリを作成し、.gitignoreに追加
-- `hiden new <filename>`: 新規ファイルを作成
-- `hiden edit`: 選択したファイルを$EDITORで開く
