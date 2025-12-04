@@ -11,7 +11,11 @@
 ## 技術スタック
 
 - 言語: Go
-- fuzzy finder: [go-fuzzyfinder](https://github.com/ktr0731/go-fuzzyfinder) ライブラリを使用（外部コマンド依存なし）
+- インタラクティブ検索: [go-fzf](https://github.com/koki-develop/go-fzf) ライブラリを使用（外部コマンド依存なし）
+  - 注: go-fuzzyfinder は入力欄が画面下部にあるため不採用
+  - 検索方式: 入力文字列を必ず含む部分一致検索（大文字小文字を区別しない）
+  - スペース区切りでAND検索
+  - ソート順: 最終更新時刻の降順（固定）
 
 ## 設定ファイル
 
@@ -90,6 +94,7 @@ YYYY-MM-DD  relative/path/to/file  [repository-name]
 - hidenディレクトリ内のすべてのファイル（再帰的）
 - 隠しファイル（`.`で始まるファイル）も対象
 - ディレクトリは対象外（ファイルのみ）
+- hidenディレクトリがシンボリックリンクの場合、リンク先のディレクトリ内を探索する
 
 ### `hiden version`
 

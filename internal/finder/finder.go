@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/koki-develop/go-fzf"
 	"github.com/sourcegraph/conc/pool"
 )
 
@@ -52,27 +51,15 @@ func Run(dirname string) (string, error) {
 		)
 	}
 
-	f, err := fzf.New(
-		fzf.WithInputPosition(fzf.InputPositionTop),
-	)
+	selectedEntry, err := runSelector(entries)
 	if err != nil {
-		return "", fmt.Errorf("failed to create fuzzy finder: %w", err)
+		return "", err
+	}
+	if selectedEntry == nil {
+		return "", ErrCancelled
 	}
 
-	idxs, err := f.Find(
-		entries,
-		func(i int) string {
-			return entries[i].displayLabel
-		},
-	)
-	if err != nil {
-		if errors.Is(err, fzf.ErrAbort) {
-			return "", ErrCancelled
-		}
-		return "", fmt.Errorf("fuzzy finder error: %w", err)
-	}
-
-	selected := entries[idxs[0]]
+	selected := *selectedEntry
 
 	now := time.Now()
 	if err := os.Chtimes(selected.absPath, now, now); err != nil {
@@ -131,10 +118,17 @@ func collectFilesFromRepo(repo, dirname string) []entry {
 		return nil
 	}
 
+	// Resolve symlink if necessary
+	resolvedHidenDir, err := filepath.EvalSymlinks(hidenDir)
+	if err != nil {
+		// If we can't resolve the symlink, fall back to the original path
+		resolvedHidenDir = hidenDir
+	}
+
 	repoName := filepath.Base(repo)
 	var entries []entry
 
-	_ = filepath.WalkDir(hidenDir, func(path string, d fs.DirEntry, err error) error {
+	_ = filepath.WalkDir(resolvedHidenDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return nil
 		}
@@ -147,9 +141,13 @@ func collectFilesFromRepo(repo, dirname string) []entry {
 			return nil
 		}
 
-		relPath, _ := filepath.Rel(hidenDir, path)
+		// Calculate relative path from the resolved directory
+		relPath, _ := filepath.Rel(resolvedHidenDir, path)
+		// Construct the absolute path using the original hiden directory (symlink)
+		absPath := filepath.Join(hidenDir, relPath)
+
 		entries = append(entries, entry{
-			absPath:  path,
+			absPath:  absPath,
 			relPath:  relPath,
 			repoName: repoName,
 			modTime:  info.ModTime(),
