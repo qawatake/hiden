@@ -60,6 +60,10 @@ Config file: `~/.config/hiden/config.json`
         └── notes.txt
 ```
 
+## Why "hiden"?
+
+"hiden" is not a typo of "hidden" — it's the romanization of 秘伝 (hiden), meaning "secret tradition" or "secret technique" in Japanese. That said, since hiden directories are usually gitignored and thus *hidden*, the spelling works on both levels.
+
 ## License
 
 MIT
