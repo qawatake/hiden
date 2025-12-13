@@ -31,6 +31,14 @@ hiden mkdir
 cd $(hiden mkdir)
 ```
 
+### Move file to hiden directory
+
+```bash
+# Move a file to today's date directory
+hiden mv notes.txt
+# => moves to .hiden/2025-12-04/notes.txt
+```
+
 ## Configuration
 
 Config file: `~/.config/hiden/config.json`
