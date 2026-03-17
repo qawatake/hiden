@@ -91,7 +91,7 @@ func runMkdir() error {
 
 func runMv() error {
 	if len(os.Args) < 3 {
-		return fmt.Errorf("usage: hiden mv <file>")
+		return fmt.Errorf("usage: hiden mv <file>...")
 	}
 
 	cfg, err := config.Load()
@@ -99,8 +99,8 @@ func runMv() error {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
 
-	filePath := os.Args[2]
-	_, err = mv.Run(cfg.Dirname, filePath)
+	filePaths := os.Args[2:]
+	_, err = mv.Run(cfg.Dirname, filePaths)
 	if err != nil {
 		return err
 	}
@@ -117,7 +117,7 @@ Usage:
 Commands:
   ls           Search and select files from hiden directories
   mkdir        Create a date-based directory in the hiden directory
-  mv <file>    Move a file to the date-based hiden directory
+  mv <file>...  Move files to the date-based hiden directory
   version      Print version information
   help         Print this help message`)
 }
