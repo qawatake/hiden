@@ -1,6 +1,6 @@
 module github.com/qawatake/hiden
 
-go 1.24.5
+go 1.27.3
 
 require (
 	github.com/charmbracelet/bubbles v0.16.1
